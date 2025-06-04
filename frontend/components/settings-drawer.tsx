@@ -33,6 +33,8 @@ const SettingsDrawer = ({
   setSelectedModel,
 }: SettingsDrawerProps) => {
   const [toolsExpanded, setToolsExpanded] = useState(true);
+  const [reasoningExpanded, setReasoningExpanded] = useState(true);
+  const isClaudeModel = selectedModel?.toLowerCase().includes("claude");
 
   // Save selected model to cookies whenever it changes
   useEffect(() => {
@@ -42,13 +44,31 @@ const SettingsDrawer = ({
         sameSite: "strict",
         secure: window.location.protocol === "https:",
       });
+
+      // Reset thinking_tokens to 0 for non-Claude models
+      if (
+        !selectedModel.toLowerCase().includes("claude") &&
+        toolSettings.thinking_tokens > 0
+      ) {
+        setToolSettings({
+          ...toolSettings,
+          thinking_tokens: 0,
+        });
+      }
     }
-  }, [selectedModel]);
+  }, [selectedModel, toolSettings, setToolSettings]);
 
   const handleToolToggle = (tool: keyof ToolSettings) => {
     setToolSettings({
       ...toolSettings,
       [tool]: !toolSettings[tool],
+    });
+  };
+
+  const handleReasoningEffortChange = (value: string) => {
+    setToolSettings({
+      ...toolSettings,
+      thinking_tokens: value === "high" ? 10000 : 0,
     });
   };
 
@@ -59,6 +79,7 @@ const SettingsDrawer = ({
       media_generation: true,
       audio_generation: true,
       browser: true,
+      thinking_tokens: 0,
     });
     setSelectedModel?.(AVAILABLE_MODELS[0]);
   };
@@ -120,6 +141,56 @@ const SettingsDrawer = ({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Reasoning Effort section - only for Claude models */}
+            {isClaudeModel && (
+              <div className="space-y-4 pt-4 border-t border-gray-700">
+                <div
+                  className="flex justify-between items-center cursor-pointer"
+                  onClick={() => setReasoningExpanded(!reasoningExpanded)}
+                >
+                  <h3 className="text-lg font-medium text-white">
+                    Reasoning Effort
+                  </h3>
+                  <ChevronDown
+                    className={`size-5 transition-transform ${
+                      reasoningExpanded ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+
+                {reasoningExpanded && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="reasoning-effort"
+                        className="text-gray-300"
+                      >
+                        Effort Level
+                      </Label>
+                      <p className="text-xs text-gray-400 mb-2">
+                        Controls how much effort the model spends on reasoning
+                        before responding
+                      </p>
+                      <Select
+                        value={
+                          toolSettings.thinking_tokens > 0 ? "high" : "standard"
+                        }
+                        onValueChange={handleReasoningEffortChange}
+                      >
+                        <SelectTrigger className="w-full bg-[#35363a] border-[#ffffff0f]">
+                          <SelectValue placeholder="Select effort level" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#35363a] border-[#ffffff0f]">
+                          <SelectItem value="standard">Standard</SelectItem>
+                          <SelectItem value="high">High-effort</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Tools section */}
             <div className="space-y-4 pt-4 border-t border-gray-700">

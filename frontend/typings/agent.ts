@@ -138,6 +138,7 @@ export interface ToolSettings {
   media_generation: boolean;
   audio_generation: boolean;
   browser: boolean;
+  thinking_tokens: number;
 }
 export interface GooglePickerResponse {
   action: string;

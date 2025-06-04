@@ -25,6 +25,15 @@ import {
 } from "./ui/dropdown-menu";
 import { GoogleDocument, GooglePickerResponse } from "@/typings/agent";
 
+interface ToolSettings {
+  deep_research: boolean;
+  pdf: boolean;
+  media_generation: boolean;
+  audio_generation: boolean;
+  browser: boolean;
+  thinking_tokens: number;
+}
+
 interface FileUploadStatus {
   name: string;
   loading: boolean;
@@ -110,6 +119,7 @@ const QuestionInput = ({
     media_generation: true,
     audio_generation: true,
     browser: true,
+    thinking_tokens: 0,
   });
 
   // Use either provided tool settings or local state

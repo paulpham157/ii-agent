@@ -87,6 +87,7 @@ export default function Home() {
     media_generation: true,
     audio_generation: true,
     browser: true,
+    thinking_tokens: 0,
   });
   const [selectedModel, setSelectedModel] = useState<string>();
   const [wsConnectionState, setWsConnectionState] = useState<
