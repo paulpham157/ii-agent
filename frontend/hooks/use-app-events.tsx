@@ -1,6 +1,6 @@
 "use client";
 
-import { RefObject } from "react";
+import { RefObject, useEffect, useRef } from "react";
 import { cloneDeep, debounce } from "lodash";
 import { toast } from "sonner";
 
@@ -14,6 +14,11 @@ export function useAppEvents({
   xtermRef: RefObject<XTerm | null>;
 }) {
   const { state, dispatch } = useAppContext();
+  const messagesRef = useRef(state.messages);
+
+  useEffect(() => {
+    messagesRef.current = state.messages;
+  }, [state.messages]);
 
   const handleEvent = (
     data: {
@@ -111,7 +116,7 @@ export function useAppEvents({
         break;
 
       case AgentEvent.FILE_EDIT:
-        const messages = [...state.messages];
+        const messages = [...messagesRef.current];
         const lastMessage = cloneDeep(messages[messages.length - 1]);
 
         if (
@@ -166,7 +171,7 @@ export function useAppEvents({
             data.content.tool_name !== TOOL.MESSAGE_USER &&
             data.content.tool_name !== TOOL.RETURN_CONTROL_TO_USER
           ) {
-            const messages = [...state.messages];
+            const messages = [...messagesRef.current];
             const lastMessage = cloneDeep(messages[messages.length - 1]);
 
             if (
