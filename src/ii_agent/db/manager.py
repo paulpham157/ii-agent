@@ -11,7 +11,7 @@ from ii_agent.core.event import EventType, RealtimeEvent
 class DatabaseManager:
     """Manager class for database operations."""
 
-    def __init__(self, db_path: str = "events.db"):
+    def __init__(self, db_path: str = "db/events.db"):
         """Initialize the database manager.
 
         Args:
