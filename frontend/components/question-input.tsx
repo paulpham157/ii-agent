@@ -51,6 +51,7 @@ interface QuestionInputProps {
   isDisabled?: boolean;
   handleEnhancePrompt?: () => void;
   handleCancel?: () => void;
+  onFilesChange?: (filesCount: number) => void;
 }
 
 const QuestionInput = ({
@@ -65,8 +66,9 @@ const QuestionInput = ({
   isDisabled,
   handleEnhancePrompt,
   handleCancel,
+  onFilesChange,
 }: QuestionInputProps) => {
-  const { state } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const [files, setFiles] = useState<FileUploadStatus[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGDriveAuthLoading, setIsGDriveAuthLoading] = useState(false);
@@ -152,8 +154,7 @@ const QuestionInput = ({
 
     setFiles((prev) => [...prev, ...newFiles]);
 
-    // Call the parent handler
-    handleFileUpload(e);
+    handleFileUpload(e, false);
 
     // After a delay, mark files as not loading (this would ideally be handled by the parent)
     setTimeout(() => {
@@ -483,6 +484,25 @@ const QuestionInput = ({
   //   });
   // };
 
+  useEffect(() => {
+    if (onFilesChange) {
+      onFilesChange(files.length);
+    }
+  }, [files, onFilesChange]);
+
+  useEffect(() => {
+    if (state.requireClearFiles) {
+      // Clear the files array
+      files.forEach((file) => {
+        if (file.preview) URL.revokeObjectURL(file.preview);
+      });
+      setFiles([]);
+
+      // Reset the flag
+      dispatch({ type: "SET_REQUIRE_CLEAR_FILES", payload: false });
+    }
+  }, [state.requireClearFiles, dispatch, files]);
+
   return (
     <motion.div
       key="input-view"
@@ -604,7 +624,7 @@ const QuestionInput = ({
         )}
         <Textarea
           className={`w-full p-4 pb-[72px] rounded-xl !text-lg focus:ring-0 resize-none !placeholder-gray-400 !bg-[#35363a] border-[#ffffff0f] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.02)] ${
-            files.length > 0 ? "pt-24 h-60" : "h-50"
+            files.length > 0 ? "pt-24 !h-[240px]" : "h-[200px]"
           } ${textareaClassName}`}
           placeholder={
             placeholder ||

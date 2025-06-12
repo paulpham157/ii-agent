@@ -6,7 +6,7 @@ from typing import Optional, List, Dict, Any
 from ii_agent.llm.base import LLMClient
 from ii_agent.llm.context_manager.llm_summarizing import LLMSummarizingContextManager
 from ii_agent.llm.token_counter import TokenCounter
-from ii_agent.tools.advanced_tools.image_search_tool import ImageSearchTool
+from ii_agent.tools.image_search_tool import ImageSearchTool
 from ii_agent.tools.base import LLMTool
 from ii_agent.llm.message_history import ToolCallParameters
 from ii_agent.tools.memory.compactify_memory import CompactifyMemoryTool
@@ -39,20 +39,21 @@ from ii_agent.tools.browser_tools import (
     BrowserSelectDropdownOptionTool,
 )
 from ii_agent.tools.visualizer import DisplayImageTool
-from ii_agent.tools.advanced_tools.audio_tool import (
+from ii_agent.tools.audio_tool import (
     AudioTranscribeTool,
     AudioGenerateTool,
 )
-from ii_agent.tools.advanced_tools.video_gen_tool import (
+from ii_agent.tools.video_gen_tool import (
     VideoGenerateFromTextTool,
     VideoGenerateFromImageTool,
     LongVideoGenerateFromTextTool,
     LongVideoGenerateFromImageTool,
 )
-from ii_agent.tools.advanced_tools.image_gen_tool import ImageGenerateTool
-from ii_agent.tools.advanced_tools.pdf_tool import PdfTextExtractTool
+from ii_agent.tools.image_gen_tool import ImageGenerateTool
+from ii_agent.tools.pdf_tool import PdfTextExtractTool
 from ii_agent.tools.deep_research_tool import DeepResearchTool
 from ii_agent.tools.list_html_links_tool import ListHtmlLinksTool
+from ii_agent.utils.constants import TOKEN_BUDGET
 
 
 def get_system_tools(
@@ -83,7 +84,7 @@ def get_system_tools(
         client=client,
         token_counter=TokenCounter(),
         logger=logger,
-        token_budget=120_000,
+        token_budget=TOKEN_BUDGET,
     )
 
     tools = [
@@ -208,12 +209,12 @@ class AgentToolManager:
         except StopIteration:
             raise ValueError(f"Tool with name {tool_name} not found")
 
-    def run_tool(self, tool_params: ToolCallParameters, history: MessageHistory):
+    async def run_tool(self, tool_params: ToolCallParameters, history: MessageHistory):
         """
-        Executes a llm tool.
+        Executes a llm tool asynchronously.
 
         Args:
-            tool (LLMTool): The tool to execute.
+            tool_params (ToolCallParameters): The tool parameters.
             history (MessageHistory): The history of the conversation.
         Returns:
             ToolResult: The result of the tool execution.
@@ -223,7 +224,7 @@ class AgentToolManager:
         tool_input = tool_params.tool_input
         self.logger_for_agent_logs.info(f"Running tool: {tool_name}")
         self.logger_for_agent_logs.info(f"Tool input: {tool_input}")
-        result = llm_tool.run(tool_input, history)
+        result = await llm_tool.run_async(tool_input, history)
 
         tool_input_str = "\n".join([f" - {k}: {v}" for k, v in tool_input.items()])
 

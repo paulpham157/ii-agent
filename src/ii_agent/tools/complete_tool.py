@@ -32,7 +32,7 @@ class CompleteTool(LLMTool):
     def reset(self):
         self.answer = ""
 
-    def run_impl(
+    async def run_impl(
         self,
         tool_input: dict[str, Any],
         message_history: Optional[MessageHistory] = None,
@@ -74,7 +74,7 @@ This tool signals a handoff point, indicating that further action is expected fr
     def reset(self):
         self.answer = ""
 
-    def run_impl(
+    async def run_impl(
         self,
         tool_input: dict[str, Any],
         message_history: Optional[MessageHistory] = None,

@@ -273,7 +273,8 @@ const Action = ({ workspaceInfo, type, value, onClick }: ActionProps) => {
     type === TOOL.LIST_HTML_LINKS ||
     type === TOOL.RETURN_CONTROL_TO_USER ||
     type === TOOL.SLIDE_DECK_INIT ||
-    type === TOOL.SLIDE_DECK_COMPLETE
+    type === TOOL.SLIDE_DECK_COMPLETE ||
+    type === TOOL.DISPLAY_IMAGE
   )
     return null;
 

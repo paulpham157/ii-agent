@@ -31,3 +31,4 @@ services:
       #If file doesn't exist, use a dummy file
       - ${GOOGLE_APPLICATION_CREDENTIALS:-.dummy-credentials.json}:/app/google-application-credentials.json
       - ../db:/app/db
+      - ~/.ii_agent_file_store:/.ii_agent_file_store

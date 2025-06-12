@@ -52,14 +52,19 @@ export default function HomeContent() {
   const { deviceId } = useDeviceId();
 
   // Use the Session Manager hook
-  const { sessionId, isLoadingSession, isReplayMode, setSessionId } =
-    useSessionManager({
-      searchParams,
-      handleEvent,
-    });
+  const {
+    sessionId,
+    isLoadingSession,
+    isReplayMode,
+    setSessionId,
+    processAllEventsImmediately,
+  } = useSessionManager({
+    searchParams,
+    handleEvent,
+  });
 
   // Use the WebSocket hook
-  const { socket, sendMessage } = useWebSocket(
+  const { socket, sendMessage, connectWebSocket } = useWebSocket(
     deviceId,
     isReplayMode,
     handleEvent
@@ -93,6 +98,7 @@ export default function HomeContent() {
       return;
     }
 
+    dispatch({ type: "SET_REQUIRE_CLEAR_FILES", payload: true });
     dispatch({ type: "SET_LOADING", payload: true });
     dispatch({ type: "SET_CURRENT_QUESTION", payload: "" });
     dispatch({ type: "SET_COMPLETED", payload: false });
@@ -104,6 +110,16 @@ export default function HomeContent() {
         setSessionId(id);
       }
     }
+
+    // Show all hidden messages
+    state.messages.forEach((message) => {
+      if (message.isHidden) {
+        dispatch({
+          type: "UPDATE_MESSAGE",
+          payload: { ...message, isHidden: false },
+        });
+      }
+    });
 
     const newUserMessage: Message = {
       id: Date.now().toString(),
@@ -117,13 +133,16 @@ export default function HomeContent() {
       payload: newUserMessage,
     });
 
-    // send init agent event when first query
-    if (!sessionId) {
+    const { thinking_tokens, ...tool_args } = state.toolSettings;
+
+    // Only send init_agent event if agent is not already initialized
+    if (!state.isAgentInitialized) {
       sendMessage({
         type: "init_agent",
         content: {
           model_name: state.selectedModel,
-          tool_args: state.toolSettings,
+          tool_args,
+          thinking_tokens,
         },
       });
     }
@@ -300,7 +319,20 @@ export default function HomeContent() {
           )}
           {`II-Agent`}
         </motion.h1>
-        {isInChatView ? (
+        {isInChatView && isReplayMode ? (
+          <div className="flex gap-x-2">
+            <Button
+              className="cursor-pointer h-10"
+              variant="outline"
+              onClick={handleShare}
+            >
+              <Share /> Share
+            </Button>
+            <Button className="cursor-pointer" onClick={handleResetChat}>
+              <X className="size-5" />
+            </Button>
+          </div>
+        ) : isInChatView ? (
           <div className="flex gap-x-2">
             <Button
               className="cursor-pointer h-10"
@@ -363,6 +395,8 @@ export default function HomeContent() {
                   handleEnhancePrompt={handleEnhancePrompt}
                   handleCancel={handleCancelQuery}
                   handleEditMessage={handleEditMessage}
+                  processAllEventsImmediately={processAllEventsImmediately}
+                  connectWebSocket={connectWebSocket}
                 />
 
                 <div className="col-span-6 bg-[#1e1f23] border border-[#3A3B3F] p-4 rounded-2xl">

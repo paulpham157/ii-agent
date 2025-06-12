@@ -31,10 +31,9 @@ class BrowserTool(LLMTool):
     ) -> ToolImplOutput:
         raise NotImplementedError("Subclasses must implement this method")
 
-    def run_impl(
+    async def run_impl(
         self,
         tool_input: dict[str, Any],
         message_history: Optional[MessageHistory] = None,
     ) -> ToolImplOutput:
-        loop = get_event_loop()
-        return loop.run_until_complete(self._run(tool_input, message_history))
+        return await self._run(tool_input, message_history)

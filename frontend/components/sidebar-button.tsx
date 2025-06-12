@@ -167,7 +167,7 @@ const SidebarButton = ({ className, workspaceInfo }: SidebarButtonProps) => {
                         )}
                       >
                         <div className="text-white text-sm font-medium truncate">
-                          {session.first_message}
+                          {session.name}
                         </div>
                         <div className="text-gray-400 text-xs flex items-center gap-1 mt-1">
                           <Clock className="h-3 w-3" />

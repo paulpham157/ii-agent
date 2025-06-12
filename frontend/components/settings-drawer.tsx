@@ -27,6 +27,14 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
   const [toolsExpanded, setToolsExpanded] = useState(true);
   const [reasoningExpanded, setReasoningExpanded] = useState(true);
 
+  // Get selected model from cookies on init
+  useEffect(() => {
+    const savedModel = Cookies.get("selected_model");
+    if (savedModel && AVAILABLE_MODELS.includes(savedModel)) {
+      dispatch({ type: "SET_SELECTED_MODEL", payload: savedModel });
+    }
+  }, [dispatch]);
+
   const isClaudeModel = useMemo(
     () => state.selectedModel?.toLowerCase().includes("claude"),
     [state.selectedModel]

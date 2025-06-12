@@ -37,7 +37,7 @@ class BrowserPressKeyTool(BrowserTool):
         except Exception as e:
             return ToolImplOutput(
                 f"Failed to press key: {e}",
-                f"Failed to press key",
+                "Failed to press key",
                 auxiliary_data={"success": False, "error": str(e)},
             )
 
