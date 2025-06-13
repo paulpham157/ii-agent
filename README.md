@@ -23,7 +23,8 @@ II-Agent is an open-source intelligent assistant designed to streamline and enha
 
 
 ## Introduction
-https://github.com/user-attachments/assets/d0eb7440-a6e2-4276-865c-a1055181bb33
+
+<https://github.com/user-attachments/assets/2707b106-f37d-41a8-beff-8802b1c9b186>
 
 
 ## Overview
