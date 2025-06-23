@@ -1,4 +1,6 @@
 from pydantic.json import pydantic_encoder
+import pickle
+import base64
 import json
 
 from typing import Optional, cast, Any
@@ -109,25 +111,22 @@ class MessageHistory:
     def restore_from_session(self, session_id: str, file_store: FileStore):
         """Restores the message history from the file store."""
         try:
-            json_str = file_store.read(
-                get_conversation_agent_history_filename(session_id)
-            )
-
-            message_lists = json.loads(json_str)
-
-            message_lists_type_adapter = TypeAdapter(list[list[GeneralContentBlock]])
-            message_lists = message_lists_type_adapter.validate_python(message_lists)
-
-            self._message_lists = message_lists
+            encoded = file_store.read(get_conversation_agent_history_filename(session_id))
+            pickled = base64.b64decode(encoded)
+            self._message_lists = pickle.loads(pickled) 
         except FileNotFoundError:
             raise FileNotFoundError(
                 f"Could not restore history from file for session id: {session_id}"
             )
 
     def save_to_session(self, session_id: str, file_store: FileStore):
-        json_str = json.dumps(self._message_lists, default=pydantic_encoder)
+        pickled = pickle.dumps(self._message_lists)
+        encoded = base64.b64encode(pickled).decode('utf-8')
 
-        file_store.write(get_conversation_agent_history_filename(session_id), json_str)
+        try:
+            file_store.write(get_conversation_agent_history_filename(session_id), encoded)
+        except Exception as e:
+            raise Exception(f"Error saving message history to session: {e}")
 
     def add_user_prompt(
         self, prompt: str, image_blocks: list[dict[str, Any]] | None = None

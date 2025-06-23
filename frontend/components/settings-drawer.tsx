@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, useEffect, useMemo } from "react";
-import { X, ChevronDown, RotateCcw } from "lucide-react";
+import { X, ChevronDown, RotateCcw, Settings2 } from "lucide-react";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 
@@ -14,29 +16,26 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
-import { AVAILABLE_MODELS, ToolSettings } from "@/typings/agent";
+import { ToolSettings } from "@/typings/agent";
 import { useAppContext } from "@/context/app-context";
+import ApiKeysDialog from "./api-keys-dialog";
 
 interface SettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpen: () => void;
 }
 
-const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
+const SettingsDrawer = ({ isOpen, onClose, onOpen }: SettingsDrawerProps) => {
   const { state, dispatch } = useAppContext();
   const [toolsExpanded, setToolsExpanded] = useState(true);
   const [reasoningExpanded, setReasoningExpanded] = useState(true);
-
-  // Get selected model from cookies on init
-  useEffect(() => {
-    const savedModel = Cookies.get("selected_model");
-    if (savedModel && AVAILABLE_MODELS.includes(savedModel)) {
-      dispatch({ type: "SET_SELECTED_MODEL", payload: savedModel });
-    }
-  }, [dispatch]);
+  const [isApiKeysDialogOpen, setIsApiKeysDialogOpen] = useState(false);
+  const [isModelConfigOpen, setIsModelConfigOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const isClaudeModel = useMemo(
-    () => state.selectedModel?.toLowerCase().includes("claude"),
+    () => state.selectedModel?.toLowerCase().includes("claude") || false,
     [state.selectedModel]
   );
 
@@ -63,7 +62,10 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
         enable_reviewer: false,
       },
     });
-    dispatch({ type: "SET_SELECTED_MODEL", payload: AVAILABLE_MODELS[0] });
+    dispatch({
+      type: "SET_SELECTED_MODEL",
+      payload: state.availableModels?.[0],
+    });
   };
 
   const handleReasoningEffortChange = (effort: string) => {
@@ -93,6 +95,30 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
       }
     }
   }, [state.selectedModel, isClaudeModel, state.toolSettings, dispatch]);
+
+  useEffect(() => {
+    if (state.toolSettings) {
+      Cookies.set("tool_settings", JSON.stringify(state.toolSettings), {
+        expires: 365, // 1 year
+        sameSite: "strict",
+        secure: window.location.protocol === "https:",
+      });
+
+      // Reset thinking_tokens to 0 for non-Claude models
+      if (!isClaudeModel && state.toolSettings.thinking_tokens > 0) {
+        dispatch({
+          type: "SET_TOOL_SETTINGS",
+          payload: { ...state.toolSettings, thinking_tokens: 0 },
+        });
+      }
+    }
+  }, [isClaudeModel, state.toolSettings, dispatch]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   return (
     <>
@@ -138,23 +164,38 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
           <div className="space-y-6">
             {/* Model selector */}
             <div className="space-y-2">
-              <Select
-                value={state.selectedModel}
-                onValueChange={(model) =>
-                  dispatch({ type: "SET_SELECTED_MODEL", payload: model })
-                }
-              >
-                <SelectTrigger className="w-full bg-[#35363a] border-[#ffffff0f]">
-                  <SelectValue placeholder="Select model" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#35363a] border-[#ffffff0f]">
-                  {AVAILABLE_MODELS.map((model) => (
-                    <SelectItem key={model} value={model}>
-                      {model}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={state.selectedModel || ""}
+                  onValueChange={(model) =>
+                    dispatch({ type: "SET_SELECTED_MODEL", payload: model })
+                  }
+                >
+                  <SelectTrigger className="w-full bg-[#35363a] border-[#ffffff0f]">
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#35363a] border-[#ffffff0f]">
+                    {(state.availableModels || []).map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-10 w-10 bg-[#35363a] border-[#ffffff0f]"
+                      onClick={() => setIsModelConfigOpen(true)}
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Configure Models</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
 
             {/* Reasoning Effort section - only for Claude models */}
@@ -189,7 +230,7 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
                       </p>
                       <Select
                         value={
-                          state.toolSettings.thinking_tokens > 0
+                          state.toolSettings?.thinking_tokens > 0
                             ? "high"
                             : "standard"
                         }
@@ -338,6 +379,37 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
                 </div>
               )}
             </div>
+
+            <div className="space-y-4 pt-4 border-t border-gray-700">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium text-white">API Keys</h3>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsApiKeysDialogOpen(true)}
+                  className="border-[#ffffff0f]"
+                >
+                  Configure
+                </Button>
+              </div>
+              <p className="text-xs text-gray-400">
+                Configure API keys for various services like OpenAI, Anthropic,
+                and search providers.
+              </p>
+            </div>
+
+            {/* API Keys Dialog */}
+            <ApiKeysDialog
+              isOpen={isApiKeysDialogOpen || isModelConfigOpen}
+              onClose={() => {
+                setIsApiKeysDialogOpen(false);
+                setIsModelConfigOpen(false);
+              }}
+              onOpen={() => {
+                setIsApiKeysDialogOpen(true);
+                onOpen();
+              }}
+              initialTab={isModelConfigOpen ? "llm-config" : "search-config"}
+            />
           </div>
         </div>
       </motion.div>
