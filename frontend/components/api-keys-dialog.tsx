@@ -986,27 +986,6 @@ const ApiKeysDialog = ({
                     className="bg-[#35363a] border-[#ffffff0f]"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="base-url">Base URL (Optional)</Label>
-                  <Input
-                    id="base-url"
-                    type="text"
-                    value={editingConfig?.config.base_url || ""}
-                    onChange={(e) => {
-                      if (editingConfig) {
-                        setEditingConfig({
-                          ...editingConfig,
-                          config: {
-                            ...editingConfig.config,
-                            base_url: e.target.value,
-                          },
-                        });
-                      }
-                    }}
-                    placeholder="Enter Base URL (if using a proxy)"
-                    className="bg-[#35363a] border-[#ffffff0f]"
-                  />
-                </div>
               </div>
             )}
 
