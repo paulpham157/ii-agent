@@ -90,7 +90,7 @@ GOOGLE_CLIENT_SECRET=<your_google_client_secret> # Optional, for Google Drive in
 ```
 docker compose up
 ```
-
+Our II-Agent supports popular models such as Claude, Gemini, and OpenAI. If you’d like to use a model from OpenRouter, simply configure your OpenAI endpoint with your OpenRouter API key.
 If you are using Vertex, run with these variables
 
 ```
