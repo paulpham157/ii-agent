@@ -15,15 +15,21 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     lsb-release \
+    tmux \
     ffmpeg \
     xvfb \
+    git \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli \
     && rm -rf /var/lib/apt/lists/*
 
 # Install the project's dependencies using the lockfile and settings
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev
+    uv sync --locked --no-install-project --no-dev --prerelease=allow
 
 # Install Playwright in a single layer
 RUN uv run playwright install --with-deps chromium
@@ -32,7 +38,7 @@ RUN uv run playwright install --with-deps chromium
 # Installing separately from its dependencies allows optimal layer caching
 COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev
+    uv sync --locked --no-dev --prerelease=allow
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
