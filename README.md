@@ -22,9 +22,9 @@ II-Agent is an open-source intelligent assistant designed to streamline and enha
 
 <https://github.com/user-attachments/assets/2707b106-f37d-41a8-beff-8802b1c9b186>
 
-## Sample show cases
+## (New Features) Full-stack Web Agent Show cases!
 
-https://github.com/user-attachments/assets/336652fd-4aaf-4cf2-8b3a-b724d35ec40c
+https://github.com/user-attachments/assets/8399f494-1e5a-43ba-9c7b-32861c51075e
 
 https://github.com/user-attachments/assets/647e6bae-bc62-4c8b-9e6e-a7c8946caf56
 
