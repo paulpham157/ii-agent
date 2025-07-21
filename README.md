@@ -74,16 +74,15 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 ### Docker Installation (Recommended)
 
 1. Clone the repository
-2. Set up the environment as mentioned in the above step
-3. If you are using Anthropic Client run
-
-<img width="821" alt="Screenshot 2025-07-08 at 17 50 34" src="https://github.com/user-attachments/assets/094f73aa-7384-4500-a670-528853f92ae7" />
-
+2. Run the following command
 
 ```
 chmod +x start.sh
 ./start.sh
 ```
+
+<img width="821" alt="Screenshot 2025-07-08 at 17 50 34" src="https://github.com/user-attachments/assets/094f73aa-7384-4500-a670-528853f92ae7" />
+
 Our II-Agent supports popular models such as Claude, Gemini, and OpenAI. If you’d like to use a model from OpenRouter, simply configure your OpenAI endpoint with your OpenRouter API key.
 If you are using Vertex, run with these variables
 
