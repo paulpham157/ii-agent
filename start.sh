@@ -32,7 +32,16 @@ EOF
     echo "[✓] Nginx Port: $NGINX_PORT"
     echo ""
     echo "Found existing frontend/.env file"
-    echo "Current frontend/.env file contents:"
+    echo "Updating NEXT_PUBLIC_API_URL in existing frontend/.env file"
+
+    # Update the NEXT_PUBLIC_API_URL line in the existing .env file
+    if grep -q "^NEXT_PUBLIC_API_URL=" frontend/.env; then
+      sed -i.bak "s|^NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=$BACKEND_URL|" frontend/.env
+    else
+      echo "NEXT_PUBLIC_API_URL=$BACKEND_URL" >>frontend/.env
+    fi
+
+    echo "Updated frontend/.env file contents:"
     echo "─────────────────────────────"
     cat frontend/.env
     echo "─────────────────────────────"
@@ -100,4 +109,3 @@ main() {
 }
 
 main "$@"
-
