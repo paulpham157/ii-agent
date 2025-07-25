@@ -1,5 +1,4 @@
-<div align="center">
-  <img src="assets/ii.png" width="200"/>
+<img width="3600" height="1890" alt="II-Agent-updated" src="https://github.com/user-attachments/assets/4e6211d1-c565-42a9-9d53-d809154a9493" />
 
 # II Agent
 
