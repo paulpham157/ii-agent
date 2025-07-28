@@ -2,6 +2,8 @@
 
 # II Agent
 
+<div align="center">
+
 [![GitHub stars](https://img.shields.io/github/stars/Intelligent-Internet/ii-agent?style=social)](https://github.com/Intelligent-Internet/ii-agent/stargazers)
 [![Discord Follow](https://dcbadge.limes.pink/api/server/yDWPsshPHB?style=flat)](https://discord.gg/yDWPsshPHB)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -10,6 +12,16 @@
 [<img src="https://devin.ai/assets/deepwiki-badge.png" alt="Ask DeepWiki.com" height="20"/>](https://deepwiki.com/Intelligent-Internet/ii-agent)
 
 </div>
+
+<p align="center">
+  <a href="https://trendshift.io/repositories/14389" target="_blank">
+    <img src="https://trendshift.io/api/badge/repositories/14389" 
+         alt="Intelligent-Internet/ii-agent | Trendshift" 
+         width="250" height="55">
+  </a>
+</p>
+
+
 
 II-Agent is an open-source intelligent assistant designed to streamline and enhance workflows across multiple domains. It represents a significant advancement in how we interact with technology—shifting from passive tools to intelligent systems capable of independently executing complex tasks.
 
