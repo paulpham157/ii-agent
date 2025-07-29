@@ -94,7 +94,6 @@ class OpenAIDirectClient(LLMClient):
                 system_message = {"role": "system", "content": system_prompt}
                 openai_messages.append(system_message)
                 system_prompt_applied = True
-        print(f"OpenAI messages: {openai_messages}") 
         
         for idx, message_list in enumerate(messages):
             internal_message = message_list[0]  # Get the first message in the list
