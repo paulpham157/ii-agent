@@ -94,12 +94,13 @@ class OpenAIDirectClient(LLMClient):
                 system_message = {"role": "system", "content": system_prompt}
                 openai_messages.append(system_message)
                 system_prompt_applied = True
-
+        print(f"OpenAI messages: {openai_messages}") 
+        
         for idx, message_list in enumerate(messages):
+            internal_message = message_list[0]  # Get the first message in the list
             if len(message_list) > 1:
-                raise ValueError("Only one entry per message supported for openai")
-            internal_message = message_list[0]
-            
+                logger.warning(f"Dropping {len(message_list) - 1} messages in list {idx} for OpenAI API. Only the first message will be sent.")
+                logger.info(f"Message content dropped: {message_list[1:]}")
             current_message_text = ""
             is_user_prompt = False
 
@@ -143,10 +144,10 @@ class OpenAIDirectClient(LLMClient):
             elif str(type(internal_message)) == str(ToolFormattedResult):
                 internal_message = cast(ToolFormattedResult, internal_message)
                 openai_message = {
-                    "role": "tool",
-                    "tool_call_id": internal_message.tool_call_id,
-                    "content": internal_message.tool_output,
-                }
+                        "role": "tool",
+                        "tool_call_id": internal_message.tool_call_id,
+                        "content": internal_message.tool_output,
+                    }
                 openai_messages.append(openai_message)
                 continue # Move to next message in outer loop
             else:
@@ -162,7 +163,7 @@ class OpenAIDirectClient(LLMClient):
                 if self.cot_model and system_prompt and not system_prompt_applied:
                     final_text_for_user_message = f"{system_prompt}\n\n{current_message_text}"
                     system_prompt_applied = True # Mark as applied
-                
+                    
                 message_content_obj = {"type": "text", "text": final_text_for_user_message}
                 openai_message = {"role": role, "content": [message_content_obj]}
                 openai_messages.append(openai_message)
@@ -210,11 +211,11 @@ class OpenAIDirectClient(LLMClient):
             try:
                 extra_body = {}
                 openai_max_tokens = max_tokens
-                openai_temperature = temperature
+                openai_temperature = temperature  # Not actually used - is this intended?
                 if self.cot_model:
                     extra_body["max_completion_tokens"] = max_tokens
                     openai_max_tokens = OpenAI_NOT_GIVEN
-                    openai_temperature = OpenAI_NOT_GIVEN
+                    openai_temperature = OpenAI_NOT_GIVEN 
                 response = self.client.chat.completions.create(
                     model=self.model_name,
                     messages=openai_messages,
@@ -223,11 +224,13 @@ class OpenAIDirectClient(LLMClient):
                     max_tokens=openai_max_tokens,
                     extra_body=extra_body,
                 )
+                assert response is not None, "OpenAI response is None"
                 break
             except (
                 OpenAI_APIConnectionError,
                 OpenAI_InternalServerError,
                 OpenAI_RateLimitError,
+                AssertionError,
             ) as e:
                 if retry == self.max_retries - 1:
                     print(f"Failed OpenAI request after {retry + 1} retries")
@@ -247,11 +250,9 @@ class OpenAIDirectClient(LLMClient):
         tool_calls = openai_response_message.tool_calls
         content = openai_response_message.content
 
-        # Exactly one of tool_calls or content should be present
+        # If both tool_calls and content are present, we log a warning and process tool_calls first.
         if tool_calls and content:
-            raise ValueError("Only one of tool_calls or content should be present")
-        elif not tool_calls and not content:
-            raise ValueError("Either tool_calls or content should be present")
+            logger.warning("Both tool_calls and content present in response. Processing tool_calls first, then content.")
 
         if tool_calls:
             available_tool_names = {t.name for t in tools} # Get set of known tool names
@@ -297,10 +298,10 @@ class OpenAIDirectClient(LLMClient):
             if not processed_tool_call:
                 logger.warning("No valid and available tool calls found after filtering.")
 
-        elif content:
+        if content:  # Changed from elif due to issue 134
             internal_messages.append(TextResult(text=content))
-        else:
-            raise ValueError(f"Unknown message type: {openai_response_message}")
+        #else:
+        #    raise ValueError(f"Unknown message type: {openai_response_message}")
 
         assert response.usage is not None
         message_metadata = {
