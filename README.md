@@ -82,6 +82,11 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 
 ## Installation
 
+
+
+<https://github.com/user-attachments/assets/afcf8eee-c11b-424c-8740-3aa60ca795ee>
+
+
 ### Docker Installation (Recommended)
 
 1. Clone the repository
